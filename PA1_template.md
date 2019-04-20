@@ -6,10 +6,7 @@ output:
         keep_md: yes
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-options(scipen = 1, digits = 2)
-```
+
 
 ## Activity Monitoring Research
 
@@ -25,7 +22,8 @@ The dataset was downloaded from the course website.
 ### 1. Loading and preprocessing the data
 
 As a first step, the data needs to be downloaded, unpacked and read into R.
-```{r, results='hide'}
+
+```r
 fileurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 download.file(fileurl,"data.zip")
 unzip("data.zip","activity.csv")
@@ -36,43 +34,70 @@ data <- read.csv("activity.csv")
 
 Next, the mean and median amount of steps per day will be calculated and illustrated  
 using a histogram.
-```{r}
+
+```r
 #take the sum of each day
 totalsteps <- sapply(split(data$steps,as.factor(data$date)), sum)
 meantotal <- mean(totalsteps, na.rm = TRUE) 
 print(meantotal)
+```
+
+```
+## [1] 10766
+```
+
+```r
 mediantotal <- median(totalsteps,na.rm = TRUE)
 print(mediantotal)
+```
+
+```
+## [1] 10765
+```
+
+```r
 hist(totalsteps,breaks = 20)
 abline(v = meantotal)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
 The vertical Line in the Histogram indicates the mean number of total steps per day.  
-This mean value is at `r meantotal`, whereas the median of steps per day is `r mediantotal`.
+This mean value is at 10766.19, whereas the median of steps per day is 10765.
 
 ### 3. Daily activity patterns
 
 This section shows how active the users were throughout the day. the plot below  
 shows the mean amount of steps for each five minute interval.
-```{r}
+
+```r
 #take the average of each interval
 avsteps <- sapply(split(data$steps,as.factor(data$interval)), mean,na.rm = TRUE)
 time <- unique(data$interval)
 maxtime <- time[which.max(avsteps)]
 print(maxtime)
+```
+
+```
+## [1] 835
+```
+
+```r
 plot(time, avsteps, type ="l")
 abline(v = maxtime)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
   
-On average, the most steps were made at `r maxtime`.
+On average, the most steps were made at 835.
 
 ### 4. Imputing missing Values
 
 Since the dataset has many missing values, a method should be used to fill 
 missing values in.
 
-```{r}
 
+```r
 numna <- sum(is.na(data$steps))
 filleddata <- data
 #fill the data with the average for the time 
@@ -82,13 +107,29 @@ filleddata$steps[is.na(data$steps)] <- round(avsteps[which(is.na(data$steps))%%2
 filledsteps <- sapply(split(filleddata$steps,as.factor(filleddata$date)), sum)
 meanfilled <- mean(filledsteps, na.rm = TRUE)
 print(meanfilled)
+```
+
+```
+## [1] 10766
+```
+
+```r
 medianfilled <- median(filledsteps,na.rm = TRUE)
 print(medianfilled)
+```
+
+```
+## [1] 10762
+```
+
+```r
 hist(filledsteps,breaks = 20)
 abline(v = meanfilled)
 ```
 
-The amount of missing data in the activity dataset is `r numna`.
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+The amount of missing data in the activity dataset is 2304.
 To fill these missing values, a simple method was used. If a value was missing, 
 the average value for that time of day was taken (and rounded).
 Since missing values are replaced by an average value, the mean and median value 
@@ -101,8 +142,8 @@ did not change. The little change in the mean value is due to the rounding error
 To see different activities during the weeks and druing weekends the data will be split  
 and the analysis from 3. will be applied again.
 
-```{r}
 
+```r
 days <- weekdays(as.Date(filleddata$date))
 filleddata$week <- "weekday"
 filleddata$week[days == "Samstag" | days == "Sonntag"] <- "weekend"
@@ -118,8 +159,9 @@ plot(time, weeksteps, type ="l", xlab = "time", ylab = "steps",
      main = "Activity During Weekdays", ylim = c(0,200))
 plot(time, endsteps, type ="l", xlab = "time", ylab = "steps",
      main = "Activity During Weekends",ylim = c(0,200))
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
   
 The data shows that activities really differ on weekends. Compared to the weekdays  
 the patients start their activity later but are overall more active during the day.
